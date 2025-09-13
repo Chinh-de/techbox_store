@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-TechboxStoreApplication<techbox_store>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "vn.techbox.techbox_store.TechboxStoreApplication",
+            "projectName": "techbox_store",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
