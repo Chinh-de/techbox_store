@@ -1,22 +1,22 @@
 version: '3.8'
 
 services:
-  # Service cho ứng dụng Spring Boot
-  app:
-    # Build image từ Dockerfile trong cùng thư mục
-    build: .
-    # Map cổng 8081 từ container ra máy local
-    ports:
-      - "8081:8081"
-    # Thiết lập biến môi trường
-    environment:
-      # Kết nối đến service "db" với tên host là "db"
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:6996/techbox_db
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=admin
-    # Đảm bảo app chỉ khởi động sau khi db đã sẵn sàng
-    depends_on:
-      - db
+  # Service cho ứng dụng Spring Boot (đã được comment để phát triển trên máy local)
+  # app:
+  #   # Build image từ Dockerfile trong cùng thư mục
+  #   build: .
+  #   # Map cổng 8081 từ container ra máy local
+  #   ports:
+  #     - "8081:8081"
+  #   # Thiết lập biến môi trường
+  #   environment:
+  #     # Kết nối đến service "db" với tên host là "db"
+  #     - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/techbox_db
+  #     - SPRING_DATASOURCE_USERNAME=admin
+  #     - SPRING_DATASOURCE_PASSWORD=admin
+  #   # Đảm bảo app chỉ khởi động sau khi db đã sẵn sàng
+  #   depends_on:
+  #     - db
 
   # Service cho cơ sở dữ liệu PostgreSQL
   db:
@@ -31,11 +31,26 @@ services:
       - POSTGRES_PASSWORD=admin
     # Map cổng từ container ra máy local (tùy chọn, để bạn có thể dùng các tool như DBeaver kết nối)
     ports:
-      - "6996:6996"
+      - "6996:5432"
     # Khôi phục dữ liệu ngay cả khi container bị xóa
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
 # Khai báo volume để lưu trữ dữ liệu database
 volumes:
   pgdata:
+  pgadmin-data:

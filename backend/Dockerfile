@@ -1,3 +1,5 @@
+# Đang chạy spring local nên không cần profile docker nữa
+
 # Stage 1: Build with Maven and Java 21
 FROM maven:3.9.8-eclipse-temurin-21 AS build
 WORKDIR /app
