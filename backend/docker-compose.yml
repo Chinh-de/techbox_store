@@ -1,41 +1,44 @@
-version: '3.8'
-
 services:
-  # Service cho ứng dụng Spring Boot (đã được comment để phát triển trên máy local)
-  # app:
-  #   # Build image từ Dockerfile trong cùng thư mục
-  #   build: .
-  #   # Map cổng 8081 từ container ra máy local
-  #   ports:
-  #     - "8081:8081"
-  #   # Thiết lập biến môi trường
-  #   environment:
-  #     # Kết nối đến service "db" với tên host là "db"
-  #     - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/techbox_db
-  #     - SPRING_DATASOURCE_USERNAME=admin
-  #     - SPRING_DATASOURCE_PASSWORD=admin
-  #   # Đảm bảo app chỉ khởi động sau khi db đã sẵn sàng
-  #   depends_on:
-  #     - db
+  app:
+    image: maven:3.9.8-eclipse-temurin-21
+    container_name: spring_app_dev
+    working_dir: /app
+    command: mvn -Dspring-boot.run.fork=false spring-boot:run
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:${POSTGRES_PORT}/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SERVER_PORT=${SERVER_PORT}
+      - TZ=${TZ}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+      - maven-repo:/root/.m2
 
   # Service cho cơ sở dữ liệu PostgreSQL
   db:
-    # Sử dụng image PostgreSQL chính thức
     image: postgres:14
-    # Đặt lại tên container cho dễ quản lý
     container_name: postgres_db
-    # Thiết lập biến môi trường để cấu hình PostgreSQL
+    env_file:
+      - .env
     environment:
-      - POSTGRES_DB=techbox_db
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
-      - TZ=Asia/Ho_Chi_Minh
-    # Map cổng từ container ra máy local (tùy chọn, để bạn có thể dùng các tool như DBeaver kết nối)
+      - TZ=${TZ}
     ports:
-      - "6996:5432"
-    # Khôi phục dữ liệu ngay cả khi container bị xóa
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d techbox_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   pgadmin:
     image: dpage/pgadmin4
@@ -51,7 +54,7 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
 
-# Khai báo volume để lưu trữ dữ liệu database
 volumes:
   pgdata:
   pgadmin-data:
+  maven-repo:

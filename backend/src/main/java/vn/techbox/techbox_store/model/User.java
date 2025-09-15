@@ -27,7 +27,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private UserRole role;
 
     @CreationTimestamp
